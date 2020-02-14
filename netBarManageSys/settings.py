@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'netBarSys',#我们自己定义的app
 ]
 
 MIDDLEWARE = [

@@ -1,0 +1,86 @@
+
+{% extends 'base.html' %}
+
+{% block head %}  
+<br/>
+{% endblock %}
+
+{% block style %}
+<style>
+    #link{
+        font-size:20px;
+        padding: 6px;
+        text-decoration:none;
+        color:gray;          
+    }
+    #selectedlink{
+        font-size:20px;
+        padding: 6px;
+        text-decoration:none;
+        color:black;         
+    }
+    
+    #textcontent {
+        width: 80%;
+        height: auto;
+        word-wrap:break-word;
+        word-break:break-all;
+        overflow: hidden;
+        margin:5% auto
+    }
+    #pcontent{
+        font-size:28px;
+        color:darkslategrey
+    }
+</style>
+{% endblock %}
+
+{% block topmenucenter %}
+    <div style="padding:20px">
+        <a id =selectedlink_center href="{% url 'pages:home' %}">首页</a>
+        <a id =link_center href="{% url 'pages:onlieuser' %}">在线用户</a> 
+        <a id =link_center  href="{% url 'pages:mguser' %}">用户管理</a> 
+    </div>
+{% endblock %}
+
+{% block contentbody %}
+    <div style="margin: 10% 20%;">
+        <form enctype='multipart/form-data' action="{% url 'pages:searchuser' %}" method="post" name='searchuser' >{% csrf_token %}
+            <table align="center">
+                <tr>
+                    <td><input type="text" id="search" name="search_content" placeholder="请输入您要搜索的用户名" style="width:600px; height:30px"/></td>
+                    <td><input type="submit" name='search' value="搜索" style="width:80px; height:50px"></td>
+            </table>
+        </form>
+        <div id=textcontent>
+            <table>
+                <tr>
+                    <td>用户</td>
+                    <td>上机时间</td>
+                    <td>下机时间</td>
+                    <td>上机时长</td>
+                    <td>费用</td>
+                    <td>状态</td>
+                    <td>强制下线</td>
+                </tr>
+            {% for userinfo in userinfo_list.all %}
+                <tr>
+                    <td>{{ userinfo.user.name }}</td>
+                    <td>{{ userinfo.loginintime }}</td>
+                    <td>{{ userinfo.lastLogouttime }}</td>
+                    <td>{{ userinfo.onlinetime }}</td>
+                    <td>{{ userinfo.fee }}</td>
+                    <td><label id="id_state"></label></td>
+                    <td>&nbsp&nbsp<a href="{% url 'pages:forceoffline' userinfo.user.id %}">强制下线</a></td>
+                </tr>
+            {% endfor %}
+            </table>
+        </div>
+    </div>
+    <script>
+       stateFunction();
+        function stateFunction() {
+           
+        }
+    </script>
+{% endblock %}
