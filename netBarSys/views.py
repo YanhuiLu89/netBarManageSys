@@ -31,3 +31,32 @@ def index(request):
             messages.add_message(request,messages.ERROR,'用户不存在')
             return render(request, 'index.html')
     return render(request, 'index.html')
+
+def home(request):#去首页
+    cook = request.COOKIES.get('username')
+    if cook == None:
+        return  render(request, 'index.html')
+    user = Users.objects.get(username = cook)
+    if user.usertype == 0:
+        userinfo_list = UserInfos.objects.filter().order_by('-publishtime')
+        context = {'userinfo_list': userinfo_list}
+        return render(request, 'homepage.html',context)
+    elif user.usertype == 1:
+        userinfo = UserInfos.objects.get(user = user)
+        context = {'userinfo': userinfo}
+        return render(request, 'homepage_a.html',context)
+
+def searchuser(request):#搜索用户
+    cook = request.COOKIES.get('username')
+    print('cook:', cook)
+    if cook == None:
+        return  render(request, 'pages/index.html')
+    user = Users.objects.get(username = cook)
+    if request.method == 'POST':
+        if 'search' in request.POST:#搜索
+            searchcontent=request.POST['search_content']
+            userinfo_list=UserInfos.objects.filter().order_by('-publishtime') 
+            context = {'userinfo_list': userinfo_list}
+            messages.add_message(request,messages.INFO,'共'+str(len(userinfo_list_list))+'条结果')
+            return  render(request,'pages/homepage_a.html',context )
+    return render(request, 'pages/homepage_a.html')

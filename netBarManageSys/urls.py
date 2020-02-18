@@ -20,4 +20,6 @@ from netBarSys import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('index/', views.index, name='index'),
+    path('home/', views.home, name='home'),
+    path('searchuser/', views.searchuser, name='searchuser'),
 ]

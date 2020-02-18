@@ -1,0 +1,68 @@
+
+{% extends 'base.html' %}
+
+{% block head %}  
+<br/>
+{% endblock %}
+
+{% block style %}
+<style>
+    #link{
+        font-size:20px;
+        padding: 6px;
+        text-decoration:none;
+        color:gray;          
+    }
+    #selectedlink{
+        font-size:20px;
+        padding: 6px;
+        text-decoration:none;
+        color:black;         
+    }
+    
+    #textcontent {
+        width: 80%;
+        height: auto;
+        word-wrap:break-word;
+        word-break:break-all;
+        overflow: hidden;
+        margin:5% auto
+    }
+    #pcontent{
+        font-size:28px;
+        color:darkslategrey
+    }
+</style>
+{% endblock %}
+
+{% block topmenucenter %}
+    <div style="padding:20px">
+        <a id =link_center href="{% url 'pages:home' %}">首页</a>
+        <a id =link_center href="{% url 'pages:mgspot' %}">景点管理</a> 
+        <a id =selectedlink_center  href="{% url 'pages:mguser' %}">个人会员管理</a> 
+		<a id =link_center href="{% url 'pages:mgplace' %}">养老机构管理</a> 
+    </div>
+{% endblock %}
+
+{% block contentbody %}
+    <div style="margin: 0% 10% 0% 10%">
+        <div style="width:100%; height:500px">
+            <form action="{% url 'pages:mguser' %}" method="post" name='mguser'>{% csrf_token %}
+                <table align="center">
+                    <tr>
+                        <td width=40%>账户</td>
+                        <td width=40%>邮箱</td>
+                        <td></td>
+                    </tr>
+                    {% for user in user_list.all %}
+                        <tr>
+                            <td>{{user.name }}</td>
+                            <td>{{ user.email }}</td>
+                            <td><a href="{% url 'pages:deluser' user.id %}">删除</a></td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </form>
+        </div>
+    </div>
+{% endblock %}

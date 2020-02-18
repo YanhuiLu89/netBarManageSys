@@ -37,15 +37,15 @@
 
 {% block topmenucenter %}
     <div style="padding:20px">
-        <a id =selectedlink_center href="{% url 'pages:home' %}">首页</a>
-        <a id =link_center href="{% url 'pages:onlieuser' %}">在线用户</a> 
-        <a id =link_center  href="{% url 'pages:mguser' %}">用户管理</a> 
+        <a id =selectedlink_center href="{% url 'home' %}">首页</a>
+        <a id =link_center href="{% url 'onlieuser' %}">在线用户</a> 
+        <a id =link_center  href="{% url 'mguser' %}">用户管理</a> 
     </div>
 {% endblock %}
 
 {% block contentbody %}
-    <div style="margin: 10% 20%;">
-        <form enctype='multipart/form-data' action="{% url 'pages:searchuser' %}" method="post" name='searchuser' >{% csrf_token %}
+    <div style="margin: 0% 5% 0% 5%">
+        <form enctype='multipart/form-data' action="{% url 'searchuser' %}" method="post" name='searchuser' >{% csrf_token %}
             <table align="center">
                 <tr>
                     <td><input type="text" id="search" name="search_content" placeholder="请输入您要搜索的用户名" style="width:600px; height:30px"/></td>
@@ -53,15 +53,15 @@
             </table>
         </form>
         <div id=textcontent>
-            <table>
+            <table align="center">
                 <tr>
-                    <td>用户</td>
-                    <td>上机时间</td>
-                    <td>下机时间</td>
-                    <td>上机时长</td>
-                    <td>费用</td>
-                    <td>状态</td>
-                    <td>强制下线</td>
+                    <td width=10%>用户</td>
+                    <td width=20%>上机时间</td>
+                    <td width=20%>下机时间</td>
+                    <td width=20%>上机时长</td>
+                    <td width=10%>费用</td>
+                    <td width=10%>状态</td>
+                    <td width=10%>管理</td>
                 </tr>
             {% for userinfo in userinfo_list.all %}
                 <tr>
@@ -77,10 +77,4 @@
             </table>
         </div>
     </div>
-    <script>
-       stateFunction();
-        function stateFunction() {
-           
-        }
-    </script>
 {% endblock %}

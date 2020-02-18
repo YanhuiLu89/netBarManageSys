@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block head %}  
+<br>
+{% endblock %}
+
+{% block style %}
+<style>
+    #textcontent {
+        width: 80%;
+        height: auto;
+        word-wrap:break-word;
+        word-break:break-all;
+        overflow: hidden;
+        margin:5% auto
+    }
+</style>
+{% endblock %}
+{% block topmenucenter %}
+    <div style="padding:20px">
+        <a id =link_center href="{% url 'pages:home' %}">首页</a>
+		<a id =link_center href="{% url 'pages:highsearch' %}">高级筛选</a>
+        <a id =selectedlink_center  href="{% url 'pages:searchspot' %}">搜索景点</a> 
+		<a id =link_center  href="{% url 'pages:retiregroup' %}">养老圈</a> 
+    </div>
+{% endblock %}
+
+{% block contentbody %}
+    <div style="margin: 10% 20%;">
+        <form enctype='multipart/form-data' action="{% url 'pages:searchspot' %}" method="post" name='searchspot' >{% csrf_token %}
+            <table align="center">
+                <tr>
+                    <td><input type="text" id="search" name="search_content" placeholder="请输入您要搜索的内容" style="width:600px; height:30px"/></td>
+                    <td><input type="submit" name='search' value="搜索" style="width:80px; height:50px"></td>
+                </tr>
+            </table>
+        </form>
+        <div id=textcontent>
+             {% for spot in spot_list.all %}
+                <h4>{{ spot.name }}</h4>
+                <img src='{{ MEDIA_URL }}{{ spot.image}}' width="800" height="600" alt=''/>
+                <p align="left" ><lable>简介:</label> {{ spot.introduce}}</p>
+                <p align="left" id=pcontent><lable>附近养老机构:</label>
+                    {% for place in spot.nearbyplace.all %}
+                    &nbsp&nbsp<a  href="{% url 'pages:placedetail' place.id %}">{{ place.name}}</a>
+                    {% endfor %}
+                </p>
+                <p align="left" id=pcontent><lable>详细地址:</label> {{ spot.address}}</p>
+                <p align="left" id=pcontent><lable>开放时间:</label> {{ spot.opentime}}</p>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
