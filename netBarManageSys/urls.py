@@ -22,4 +22,10 @@ urlpatterns = [
     path('index/', views.index, name='index'),
     path('home/', views.home, name='home'),
     path('searchuser/', views.searchuser, name='searchuser'),
+    path('mguser/', views.mguser, name='mguser'),
+    path('logout/', views.logout, name='logout'),
+    path('myinfo/', views.myinfo, name='myinfo'),
+    path('onlineuser/', views.onlineuser, name='onlineuser'),
+    path('adduser/', views.adduser, name='adduser'),
+    path('deluser/<user_id>', views.deluser, name='deluser'),
 ]

@@ -37,28 +37,45 @@
 
 {% block topmenucenter %}
     <div style="padding:20px">
-        <a id =link_center href="{% url 'pages:home' %}">首页</a>
-        <a id =link_center href="{% url 'pages:mgspot' %}">景点管理</a> 
-        <a id =selectedlink_center  href="{% url 'pages:mguser' %}">个人会员管理</a> 
-		<a id =link_center href="{% url 'pages:mgplace' %}">养老机构管理</a> 
+        <div style="padding:20px">
+            <a id =center href="{% url 'home' %}">首页</a>
+            <a id =link_center href="{% url 'onlineuser' %}">在线用户</a> 
+            <a id =selectedlink_center  href="{% url 'mguser' %}">用户管理</a> 
+        </div>
     </div>
 {% endblock %}
 
 {% block contentbody %}
     <div style="margin: 0% 10% 0% 10%">
+        <div  style="width:100%; height:100px">
+            <form action="{% url 'adduser' %}" method="post" name="adduser">{% csrf_token %}
+                <tr>
+                    <td width="40%">账号<input type="text"  name="name"></td>
+                    <td width="40%">密码:<input type="text"  name="password"></td>
+                    <td style="width: 20%;height:60px">角色
+                        <select id="customer"  name="type" panelHeight="auto" style="width: 100%;height:30px;float:left">
+                        <option value=0>顾客</option>
+                        <option value=1>管理员</option>
+                        </select> 
+                    </td>
+                </tr>
+            </form>
+        </div>
         <div style="width:100%; height:500px">
-            <form action="{% url 'pages:mguser' %}" method="post" name='mguser'>{% csrf_token %}
+            <form action="{% url 'mguser' %}" method="post" name='mguser'>{% csrf_token %}
                 <table align="center">
                     <tr>
-                        <td width=40%>账户</td>
-                        <td width=40%>邮箱</td>
+                        <td width=30%>账号</td>
+                        <td width=30%>密码</td>
+                        <td width=20%>角色</td>
                         <td></td>
                     </tr>
                     {% for user in user_list.all %}
                         <tr>
                             <td>{{user.name }}</td>
-                            <td>{{ user.email }}</td>
-                            <td><a href="{% url 'pages:deluser' user.id %}">删除</a></td>
+                            <td>{{ user.password }}</td>
+                            <td><label id="id_type"></label></td>
+                            <td><a href="{% url 'deluser' user.id %}">删除</a></td>
                         </tr>
                     {% endfor %}
                 </table>

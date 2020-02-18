@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block head %}  
+<br/>
+{% endblock %}
+
+{% block style %}
+<style>
+    #textcontent {
+        width: 80%;
+        height: auto;
+        word-wrap:break-word;
+        word-break:break-all;
+        overflow: hidden;
+        margin:5% auto
+    }
+    #pcontent{
+        font-size:28px;
+        color:darkslategrey
+    }
+</style>
+{% endblock %}
+{% block topmenucenter %}
+    <div style="padding:20px">
+        <a id =link_center href="{% url 'pages:home' %}">首页</a>
+		<a id =link_center href="{% url 'pages:highsearch' %}">高级筛选</a>
+        <a id =link_center  href="{% url 'pages:searchspot' %}">搜索景点</a> 
+		<a id =link_center  href="{% url 'pages:retiregroup' %}">养老圈</a> 
+    </div>
+{% endblock %}
+
+{% block contentbody %}
+    <div style="margin: 0% 10% 0% 10%">
+        <div style="width:100%; height:300px">
+            <h4>我的->个人信息</h4>
+            <table style="margin:0% 0% 0% 0%;width:100%">
+                <tr align="left">
+                    <td width="50%">账户:{{ my.name }}</td>
+                    <td width="50%">邮箱:{{ my.email}}</td>
+                </tr>
+            </table>
+            <p align="left">
+                地址:{{ my.address }}
+                <br/>
+                电话:{{ my.phone }}
+                <br/>
+                <a  href="{% url 'pages:editmyinfo' %}">编辑</a>
+            </p>
+        </div>
+        <div style="margin: 0% 10% 0% 10%;width:100%; height:300px; color:darkslategrey;font-size:28px;">
+            <h4>我的->订单</h4>
+            {% for order in order_list.all %}
+            <table align="left" style="margin:0% 0% 0% 0%;width:100%" >
+                <tr>
+                    <td style="width:50%" align="left">养老机构：{{order.place.name}}</td>
+                    <td style="width:50%" align="left">电话：{{order.place.phone}}</td>
+                </tr>
+                <tr>
+                    <td style="width:50%" align="left">入住人姓名：{{order.guestname}}</td>
+                    <td style="width:50%"  align="left">电话：{{order.phone}}</td>
+                </tr>
+                <tr>
+                    <td style="width:50%" align="left">{{order.checkintime}}入住</td>
+                    <td style="width:50%" align="left">{{order.checkouttime}}离开</td>
+                </tr>
+                <tr>
+                    <td tyle="width:50%" align="left">费用：{{order.fee}}</td>
+                    <td style="width:50%"  align="left">订单状态：<label name="state" id= "state{{order.state}}"></label></td>
+                </tr>
+            </table>
+            <p align="left">
+                地址：{{order.place.address}}<br>
+                <b align="left"  style="color:grey;font-size:20px;"> 订单创建时间：{{order.time}}</b>
+                <a align="right"  name="cancel" href="{% url 'pages:cancelorder' order.id %}">取消</a><br>
+            </p>
+            {% endfor %}
+        </div>
+        <script>
+            window.onload=function(){
+            var cancels = document.getElementsByName('cancel');
+            var states = document.getElementsByName('state');
+                for( var i=0; i<cancels.length; i++){
+                    var btn = cancels[i];
+                    var state=states[i];
+                    if(state.id.indexOf("0")!=-1){
+                        state.innerText="已提交待商家确认";
+                        btn.style.display="display";
+                    }
+                    else if(state.id.indexOf("1")!=-1){
+                        state.innerText="已确认";
+                        btn.style.display="none";
+                    }
+                    else if(state.id.indexOf("2")!=-1){
+                        state.innerText="已取消";
+                        btn.style.display="none";
+                    }
+                    else if(state.id.indexOf("3")!=-1){
+                        state.innerText="已拒绝";
+                        btn.style.display="none";
+                    }
+                    else if(state.id.indexOf("4")!=-1){
+                        state.innerText="已完成";
+                        btn.style.display="none";
+                    }
+                 }
+            }
+            </script>
+    </div>
+{% endblock %}
