@@ -40,12 +40,11 @@
         }
         #heading{
             width: 100%;
-            height: 32px;
-            font-size:32px;
+            height: 30px;
+            font-size:20px;
             border:0;
-            font-weight: bold;
-            float:center;
-            vertical-align: bottom;
+            background-color:gainsboro;
+            vertical-align: top;
         }
         #content_body{
             width: 100%;
@@ -91,20 +90,19 @@
 <body>
     <!-- 在这里控制全局的页面，定义div的id是"global" -->
     <div id="global">
-        <tr>
+        <div id="heading" align="left">
+            {% block heading %}
+               <label >AA网吧系统</label>
+            {% endblock %}
+        </div>
         <div id="topmenuright" >
-                {% block topmenuright %}
-                    <a id =link  href="{% url 'myinfo' %}">我的</a> 
-                    <a id =link href="{% url 'logout' %}">退出</a> 
-                {% endblock %}
-            </div>
-            <div id="topmenucenter">
-                {% block topmenucenter %}
-                {% endblock %}
-            </div>
-        </tr>
-        <div id="heading">
-            {% block head %}
+            {% block topmenuright %}
+                <a id =link  href="{% url 'myinfo' %}">我的</a> 
+                <a id =link href="{% url 'logout' %}">退出</a> 
+            {% endblock %}
+        </div>
+        <div id="topmenucenter">
+            {% block topmenucenter %}
             {% endblock %}
         </div>
         <div id="content_body">

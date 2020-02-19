@@ -36,7 +36,7 @@
 {% endblock %}
 
 {% block topmenucenter %}
-    <div style="padding:20px">
+    <div style="padding:5px">
         <a id =selectedlink_center href="{% url 'home' %}">首页</a>
         <a id =link_center href="{% url 'onlineuser' %}">在线用户</a> 
         <a id =link_center  href="{% url 'mguser' %}">用户管理</a> 
@@ -44,7 +44,7 @@
 {% endblock %}
 
 {% block contentbody %}
-    <div style="margin: 0% 5% 0% 5%">
+    <div style="margin: 5% 5% 5% 5%">
         <form enctype='multipart/form-data' action="{% url 'searchuser' %}" method="post" name='searchuser' >{% csrf_token %}
             <table align="center">
                 <tr>
