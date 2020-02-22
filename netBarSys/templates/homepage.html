@@ -1,9 +1,14 @@
 {% extends 'base.html' %}
 
 {% block head %}  
-
+<br/>
 {% endblock %}
 
+{% block topmenucenter %}
+    <div style="padding:5px">
+        <a id =selectedlink_center href="{% url 'home' %}">首页</a>
+    </div>
+{% endblock %}
 
 {% block contentbody %}
 <div id=textcontent>

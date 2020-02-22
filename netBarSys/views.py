@@ -7,23 +7,24 @@ from .models import Users,UserInfos
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime
 
-def timfunc():
-    userinfo_list = UserInfos.objects.all()
-    print("Tick! userinfo_list=%s" % userinfo_list.count())
-    # for userinfo in userinfo_list:
-    #     if userinfo.state==0:
-    #         userinfo.onlinetime=(datetime.now()-userinfo.logintime).minute
-    #         print('Tick! The time is: %s' % (datetime.now()-userinfo.logintime).minute)
-    return HttpResponseRedirect(reverse('home'))
+# def timfunc():
+#     userinfo_list = UserInfos.objects.all()
+#     print("Tick! userinfo_list=%s" % userinfo_list.count())
+#     # for userinfo in userinfo_list:
+#     #     if userinfo.state==0:
+#     #         userinfo.onlinetime=(datetime.now()-userinfo.logintime).minute
+#     #         print('Tick! The time is: %s' % (datetime.now()-userinfo.logintime).minute)
+#     return HttpResponseRedirect(reverse('home'))
     
 
-scheduler = BackgroundScheduler()
-scheduler.add_job(timfunc, 'interval', seconds=10) #1分钟定时器
-scheduler.start()
+# scheduler = BackgroundScheduler()
+# scheduler.add_job(timfunc, 'interval', seconds=10) #1分钟定时器
+# scheduler.start()
 
 
 
 def index(request):
+    print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
     if request.method == 'POST':
         tempname = request.POST['name']
         password =  request.POST['password']
@@ -31,49 +32,65 @@ def index(request):
         # 查询用户是否在数据库中
         print("%s,%s,%d"%(tempname,password,usertype))
         if Users.objects.filter(name=tempname).exists():
+            print("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB")
             user=Users.objects.get(name=tempname)
+
             if user.password==password and int(user.usertype)==usertype:
-                request.session['is_login'] = 'true'
-                request.session['name'] = 'name',
-                if user.usertype==1:
-                    userinfo_list = UserInfos.objects.filter().order_by('logintime')
-                    context = {'userinfo_list': userinfo_list}
-                    response=render(request, 'homepage_a.html',context)#跳到管理员首页界面
+                print("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCc")
+                if request.session.get("is_login")=='true' and request.COOKIES.get('name')==tempname:
+                    print("DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD")
+                    return HttpResponseRedirect(reverse('home'))
                 else:
-                    userinfo = UserInfos.objects.get(user = user)
-                    if userinfo.state==3:
-                        messages.add_message(request,messages.ERROR,'距离你上次长时间上网还不到2个小时，请再休息一会')
+                    print("EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE")
+                    request.session['is_login'] = 'true'
+                    request.session['name'] = 'name',
+                    if user.usertype==1:
+                        userinfo_list = UserInfos.objects.filter().order_by('logintime')
+                        context = {'userinfo_list': userinfo_list}
+                        response=render(request, 'homepage_a.html',context)#跳到管理员首页界面
                     else:
-                        userinfo.state=1
-                        userinfo.save()
-                        context = {'userinfo': userinfo}
-                        response=render(request, 'homepage.html',context)#跳到顾客首页界面
+                        print("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")
+                        userinfo = UserInfos.objects.get(user = user)
+                        if userinfo.state==3:
+                            print("GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG")
+                            messages.add_message(request,messages.ERROR,'距离你上次长时间上网还不到2个小时，请再休息一会')
+                            return render(request, 'index.html')
+                        else:
+                            print("HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH")
+                            userinfo.state=1
+                            userinfo.save()
+                            context = {'userinfo': userinfo}
+                            response=render(request, 'homepage.html',context)#跳到顾客首页界面
                 #set cookie
+                print("JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ")
                 response.set_cookie('name', user.name)
                 return response
             else:
+                print("KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK")
                 messages.add_message(request,messages.ERROR,'用户密码或身份类型错误')
                 return render(request, 'index.html')
         else:
+            print("LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL")
             messages.add_message(request,messages.ERROR,'用户不存在')
             return render(request, 'index.html')
+    print("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMM")
     return render(request, 'index.html')
 
 def home(request):#去首页
-    print("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
+    print("NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN")
     cook = request.COOKIES.get('name')
     if cook == None:
-        print("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY")
+        print("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
         return  render(request, 'index.html')
     user = Users.objects.get(name = cook)
     if user.usertype == 0:
-        print("NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN")
+        print("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP")
         userinfo = UserInfos.objects.get(user = user)
-        print("EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE %d" %userinfo.state)
+        print("QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ %d" %userinfo.state)
         context = {'userinfo': userinfo}
         return render(request, 'homepage.html',context)
     elif user.usertype == 1:
-        print("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW")
+        print("RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR")
         userinfo_list = UserInfos.objects.filter().order_by('logintime')
         context = {'userinfo_list': userinfo_list}
         return render(request, 'homepage_a.html',context)
