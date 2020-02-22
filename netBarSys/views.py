@@ -7,17 +7,17 @@ from .models import Users,UserInfos
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime
 
-def timfunc():
-    userinfo_list = UserInfos.objects.all()
-    print("Tick! userinfo_list=%s" % userinfo_list.count())
-    for userinfo in userinfo_list:
-        if userinfo.state==0:
-            userinfo.onlinetime=(datetime.now()-userinfo.logintime).minute
-            print('Tick! The time is: %s' % (datetime.now()-userinfo.logintime).minute)
+# def timfunc():
+#     userinfo_list = UserInfos.objects.all()
+#     print("Tick! userinfo_list=%s" % userinfo_list.count())
+#     for userinfo in userinfo_list:
+#         if userinfo.state==0:
+#             userinfo.onlinetime=(datetime.now()-userinfo.logintime).minute
+#             print('Tick! The time is: %s' % (datetime.now()-userinfo.logintime).minute)
 
-scheduler = BackgroundScheduler()
-scheduler.add_job(timfunc, 'interval', seconds=10) #1分钟定时器
-scheduler.start()
+# scheduler = BackgroundScheduler()
+# scheduler.add_job(timfunc, 'interval', seconds=10) #1分钟定时器
+# scheduler.start()
 
 
 
@@ -27,7 +27,7 @@ def index(request):
         password =  request.POST['password']
         usertype=int((request.POST['usertype']))
         # 查询用户是否在数据库中
-        print("%s,%s,%d"%(tempname,password,usertype))
+        print("1111111111111111111111111111111111111111111%s,%s,%d"%(tempname,password,usertype))
         if Users.objects.filter(name=tempname).exists():
             user=Users.objects.get(name=tempname)
             if user.password==password and int(user.usertype)==usertype:

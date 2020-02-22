@@ -5,36 +5,6 @@
 <br/>
 {% endblock %}
 
-{% block style %}
-<style>
-    #link{
-        font-size:20px;
-        padding: 6px;
-        text-decoration:none;
-        color:gray;          
-    }
-    #selectedlink{
-        font-size:20px;
-        padding: 6px;
-        text-decoration:none;
-        color:black;         
-    }
-    
-    #textcontent {
-        width: 80%;
-        height: auto;
-        word-wrap:break-word;
-        word-break:break-all;
-        overflow: hidden;
-        margin:5% auto
-    }
-    #pcontent{
-        font-size:28px;
-        color:darkslategrey
-    }
-</style>
-{% endblock %}
-
 {% block topmenucenter %}
     <div style="padding:5px">
         <a id =selectedlink_center href="{% url 'home' %}">首页</a>
@@ -67,7 +37,7 @@
                 <tr>
                     <td>{{ userinfo.user.name }}</td>
                     <td>{{ userinfo.logintime }}</td>
-                    <td>{{ userinfo.lastLogouttime }}</td>
+                    <td>{{ userinfo.lastlogouttime }}</td>
                     <td>{{ userinfo.onlinetime }}</td>
                     <td>{{ userinfo.fee }}</td>
                     <td><label id="id_state"></label></td>
