@@ -40,11 +40,38 @@
                     <td>{{ userinfo.lastlogouttime }}</td>
                     <td>{{ userinfo.onlinetime }}</td>
                     <td>{{ userinfo.fee }}</td>
-                    <td><label id="id_state"></label></td>
+                    <td ><label name="state" id= "state{{userinfo.state}}"></label></td>
                     <td>&nbsp&nbsp<a href="{% url 'forceoffline' userinfo.user.id %}">强制下线</a></td>
                 </tr>
             {% endfor %}
             </table>
         </div>
+        <script>
+            window.onload=function(){
+            var states = document.getElementsByName('state');
+            for( var i=0; i<states.length; i++){
+                var state=states[i];
+                if(state.id.indexOf("0")!=-1){
+                    state.innerText="离线";
+                }
+                else if(state.id.indexOf("1")!=-1){
+                    state.innerText="在线";
+                }
+                else if(state.id.indexOf("2")!=-1){
+                    state.innerText="管理员手动强制下线";
+                }
+                else if(state.id.indexOf("3")!=-1){
+                    state.innerText="超时自动强制下线";
+                }
+            }
+        }
+        setTimeout("timer()",20000);
+        function timer(){
+            alert("11111111111111111111111");
+            window.location.reload()
+            setTimeout("timer()",20000);
+            alert("222222222222222222222222");
+        }
+        </script>
     </div>
 {% endblock %}

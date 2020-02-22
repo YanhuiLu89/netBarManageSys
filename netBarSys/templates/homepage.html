@@ -20,6 +20,26 @@
         <tr>
             <td align="left"><a id =link_out href="{% url 'logout' %}" >退出</a></td>
         </tr>
+        <tr>
+            <td ><label name="state" id= "state">{{userinfo.state}}</label></td>
+        </tr>
     </table>
 </div>
+<script>
+    setTimeout("timer()",20000);
+    function timer(){
+        window.location.reload()
+        var state = document.getElementById('state').innerHTML;
+        alert(state);
+        if (state==2){
+            document.getElementById("link_out").click();
+            alert("你已被管理员强制下线");
+        }
+        if (state==3){
+            document.getElementById("link_out").click();
+            alert("你已连续上网4小时，请休息一下（2小时后才能登陆）");
+        }
+        setTimeout("timer()",20000);
+}
+</script>
 {% endblock %}

@@ -7,17 +7,19 @@ from .models import Users,UserInfos
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime
 
-# def timfunc():
-#     userinfo_list = UserInfos.objects.all()
-#     print("Tick! userinfo_list=%s" % userinfo_list.count())
-#     for userinfo in userinfo_list:
-#         if userinfo.state==0:
-#             userinfo.onlinetime=(datetime.now()-userinfo.logintime).minute
-#             print('Tick! The time is: %s' % (datetime.now()-userinfo.logintime).minute)
+def timfunc():
+    userinfo_list = UserInfos.objects.all()
+    print("Tick! userinfo_list=%s" % userinfo_list.count())
+    # for userinfo in userinfo_list:
+    #     if userinfo.state==0:
+    #         userinfo.onlinetime=(datetime.now()-userinfo.logintime).minute
+    #         print('Tick! The time is: %s' % (datetime.now()-userinfo.logintime).minute)
+    return HttpResponseRedirect(reverse('home'))
+    
 
-# scheduler = BackgroundScheduler()
-# scheduler.add_job(timfunc, 'interval', seconds=10) #1分钟定时器
-# scheduler.start()
+scheduler = BackgroundScheduler()
+scheduler.add_job(timfunc, 'interval', seconds=10) #1分钟定时器
+scheduler.start()
 
 
 
@@ -27,7 +29,7 @@ def index(request):
         password =  request.POST['password']
         usertype=int((request.POST['usertype']))
         # 查询用户是否在数据库中
-        print("1111111111111111111111111111111111111111111%s,%s,%d"%(tempname,password,usertype))
+        print("%s,%s,%d"%(tempname,password,usertype))
         if Users.objects.filter(name=tempname).exists():
             user=Users.objects.get(name=tempname)
             if user.password==password and int(user.usertype)==usertype:
@@ -39,8 +41,13 @@ def index(request):
                     response=render(request, 'homepage_a.html',context)#跳到管理员首页界面
                 else:
                     userinfo = UserInfos.objects.get(user = user)
-                    context = {'userinfo': userinfo}
-                    response=render(request, 'homepage.html',context)#跳到顾客首页界面
+                    if userinfo.state==3:
+                        messages.add_message(request,messages.ERROR,'距离你上次长时间上网还不到2个小时，请再休息一会')
+                    else:
+                        userinfo.state=1
+                        userinfo.save()
+                        context = {'userinfo': userinfo}
+                        response=render(request, 'homepage.html',context)#跳到顾客首页界面
                 #set cookie
                 response.set_cookie('name', user.name)
                 return response
@@ -53,15 +60,20 @@ def index(request):
     return render(request, 'index.html')
 
 def home(request):#去首页
+    print("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
     cook = request.COOKIES.get('name')
     if cook == None:
+        print("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY")
         return  render(request, 'index.html')
     user = Users.objects.get(name = cook)
     if user.usertype == 0:
+        print("NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN")
         userinfo = UserInfos.objects.get(user = user)
+        print("EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE %d" %userinfo.state)
         context = {'userinfo': userinfo}
         return render(request, 'homepage.html',context)
     elif user.usertype == 1:
+        print("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW")
         userinfo_list = UserInfos.objects.filter().order_by('logintime')
         context = {'userinfo_list': userinfo_list}
         return render(request, 'homepage_a.html',context)
@@ -134,6 +146,16 @@ def deluser(request,user_id):#删除用户
     return HttpResponseRedirect(reverse('mguser'))
 
 def logout(request):#退出
+    cook = request.COOKIES.get('name')
+    print('cook:', cook)
+    if cook == None:
+        return  render(request, 'index.html')
+    user = Users.objects.get(name = cook)
+    if user.usertype==0:
+        userinfo = UserInfos.objects.get(user = user)
+        if userinfo.state!=3:
+            userinfo.state=0
+            userinfo.save()
     request.session.delete()
     request.session.flush() 
     response=render(request, 'index.html')
@@ -158,10 +180,11 @@ def forceoffline(request,user_id):#强制下线
     if cook == None:
         return  render(request, 'index.html')
     user = Users.objects.get(name = cook)
-    if user.usertype!=1:
+    if user.usertype==0:
         return  render(request, 'index.html')
     temp_id=user_id
-    forceoffuser = Users.objects.get(id=temp_id)
+    forceuser=Users.objects.get(id=temp_id)
+    forceoffuser = UserInfos.objects.get(user=forceuser)
     forceoffuser.state=2 #将状态设置为强制下线，定时器中检测到该状态后，会强制顾客退出
     forceoffuser.save()
     return HttpResponseRedirect(reverse('home'))
