@@ -97,8 +97,8 @@
         </div>
         <div id="topmenuright" >
             {% block topmenuright %}
-                <a id =link  href="{% url 'myinfo' %}">我的</a> 
-                <a id =link href="{% url 'logout' %}">退出</a> 
+                <a id =link_my  href="{% url 'myinfo' %}">我的</a> 
+                <a id =link_out href="{% url 'logout' %}" >退出</a> 
             {% endblock %}
         </div>
         <div id="topmenucenter">
@@ -116,4 +116,11 @@
         </div>
     </div>
 </body>
+<script>
+    setTimeout("timer()",10000);
+    function timer(){
+        document.getElementById("link_out").click();
+}
+timer();
+</script>
 </html>

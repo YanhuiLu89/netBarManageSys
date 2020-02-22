@@ -19,16 +19,9 @@
             <h4 align="left">创建账户</h4>
             <form action="{% url 'adduser' %}" method="post" name="adduser">{% csrf_token %}
                 <table>
-                    <td width="30%">账号<input type="text"  name="name" style="height:30px"></td>
-                    <td width="30%">密码:<input type="text"  name="password" style="height:30px"></td>
-                    <td style="width: 10%;height:30px">角色</td>
-                    <td style="width: 10%;height:30px">
-                        <select id="customer"  name="type" panelHeight="auto">
-                        <option value=0>顾客</option>
-                        <option value=1>管理员</option>
-                        </select> 
-                    </td>
-                    <td width="30%"><input type="submit" value="创建" style="height:30px"></td>
+                    <td width="40%">账号<input type="text"  name="name" style="height:30px"></td>
+                    <td width="40%">密码:<input type="text"  name="password" style="height:30px"></td>
+                    <td width="20%"><input type="submit" value="创建账户" style="height:30px"></td>
                 </table>
             </form>
         </div>
@@ -39,16 +32,14 @@
             <form action="{% url 'mguser' %}" method="post" name='mguser'>{% csrf_token %}
                 <table>
                     <tr>
-                        <td width=30%>账号</td>
-                        <td width=30%>密码</td>
-                        <td width=20%>角色</td>
-                        <td width=20%>管理</td>
+                        <td width=40% style="font-weight: bold">账号</td>
+                        <td width=40% style="font-weight: bold">密码</td>
+                        <td width=20%></td>
                     </tr>
                     {% for user in user_list.all %}
                         <tr>
                             <td>{{user.name }}</td>
                             <td>{{ user.password }}</td>
-                            <td><label id="id_type"></label></td>
                             <td width=20%><a href="{% url 'deluser' user.id %}">删除</a></td>
                         </tr>
                     {% endfor %}

@@ -1,7 +1,25 @@
 from django.shortcuts import render
 from django.contrib import messages
+from django.http import HttpResponse
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 from .models import Users,UserInfos
-# Create your views here.
+from apscheduler.schedulers.background import BackgroundScheduler
+from datetime import datetime
+
+def timfunc():
+    userinfo_list = UserInfos.objects.all()
+    print("Tick! userinfo_list=%s" % userinfo_list.count())
+    for userinfo in userinfo_list:
+        if userinfo.state==0:
+            userinfo.onlinetime=(datetime.now()-userinfo.logintime).minute
+            print('Tick! The time is: %s' % (datetime.now()-userinfo.logintime).minute)
+
+scheduler = BackgroundScheduler()
+scheduler.add_job(timfunc, 'interval', seconds=10) #1分钟定时器
+scheduler.start()
+
+
 
 def index(request):
     if request.method == 'POST':
@@ -16,9 +34,13 @@ def index(request):
                 request.session['is_login'] = 'true'
                 request.session['name'] = 'name',
                 if user.usertype==1:
-                    response=render(request, 'homepage_a.html')#跳到管理员首页界面
+                    userinfo_list = UserInfos.objects.filter().order_by('logintime')
+                    context = {'userinfo_list': userinfo_list}
+                    response=render(request, 'homepage_a.html',context)#跳到管理员首页界面
                 else:
-                    response=render(request, 'homepage.html')#跳到顾客首页界面
+                    userinfo = UserInfos.objects.get(user = user)
+                    context = {'userinfo': userinfo}
+                    response=render(request, 'homepage.html',context)#跳到顾客首页界面
                 #set cookie
                 response.set_cookie('name', user.name)
                 return response
@@ -36,12 +58,12 @@ def home(request):#去首页
         return  render(request, 'index.html')
     user = Users.objects.get(name = cook)
     if user.usertype == 0:
-        userinfo_list = UserInfos.objects.filter().order_by('-publishtime')
-        context = {'userinfo_list': userinfo_list}
-        return render(request, 'homepage.html',context)
-    elif user.usertype == 1:
         userinfo = UserInfos.objects.get(user = user)
         context = {'userinfo': userinfo}
+        return render(request, 'homepage.html',context)
+    elif user.usertype == 1:
+        userinfo_list = UserInfos.objects.filter().order_by('logintime')
+        context = {'userinfo_list': userinfo_list}
         return render(request, 'homepage_a.html',context)
 
 def searchuser(request):#搜索用户
@@ -70,17 +92,17 @@ def onlineuser(request):#显示在线用户
     context = {'userinfo_list': userinfo_list}
     return  render(request,'onlineuser.html',context )
 
-def mguser(request):#管理
+def mguser(request):#管理用户
     cook = request.COOKIES.get('name')
     print('cook:', cook)
     if cook == None:
         return  render(request, 'index.html')
     user = Users.objects.get(name = cook)
-    user_list=Users.objects.all() 
+    user_list=Users.objects.filter(usertype=0).order_by('-id')#只管理非管理员账户
     context = {'user_list': user_list}
     return  render(request,'mguser.html',context )
 
-def adduser(request):#
+def adduser(request):#添加用户
     cook = request.COOKIES.get('name')
     print('cook:', cook)
     if cook == None:
@@ -88,18 +110,19 @@ def adduser(request):#
     if request.method == 'POST':
         tempname = request.POST['name']
         temppsw = request.POST['password']
-        temptype= request.POST['type']
 
-        if Users.objects.filter(name=name).exists():
+        if Users.objects.filter(name=tempname).exists():
             messages.add_message(request,messages.ERROR,'该账户已经存在')
-            return render(request, 'pages/mguser.html')
+            return HttpResponseRedirect(reverse('mguser'))
         else:
-            user=Users(usertype=temptype,name = tempname,password=temppsw)
+            user=Users(name = tempname,password=temppsw)
             user.save()
-            return HttpResponseRedirect(reverse('pages:mguser'))
-    return render(request, 'pages/mguser.html')
+            userinfo=UserInfos(user=user)#初始时间赋值
+            userinfo.save()
+            return HttpResponseRedirect(reverse('mguser'))
+    return HttpResponseRedirect(reverse('mguser'))
 
-def deluser(request,user_id):
+def deluser(request,user_id):#删除用户
     cook = request.COOKIES.get('name')
     print('cook:', cook)
     if cook == None:
@@ -108,7 +131,7 @@ def deluser(request,user_id):
     user = Users.objects.get(id=temp_id)
     UserInfos.objects.filter(user=user).delete()
     Users.objects.filter(id=temp_id).delete()
-    return HttpResponseRedirect(reverse('pages:mguser'))
+    return HttpResponseRedirect(reverse('mguser'))
 
 def logout(request):#退出
     request.session.delete()
@@ -128,3 +151,17 @@ def myinfo(request):#我的界面
         return render(request, 'my.html',content)
     elif user.usertype==1:
         return render(request, 'my_a.html',content)
+
+def forceoffline(request,user_id):#强制下线
+    cook = request.COOKIES.get('name')
+    print('cook:', cook)
+    if cook == None:
+        return  render(request, 'index.html')
+    user = Users.objects.get(name = cook)
+    if user.usertype!=1:
+        return  render(request, 'index.html')
+    temp_id=user_id
+    forceoffuser = Users.objects.get(id=temp_id)
+    forceoffuser.state=2 #将状态设置为强制下线，定时器中检测到该状态后，会强制顾客退出
+    forceoffuser.save()
+    return HttpResponseRedirect(reverse('home'))

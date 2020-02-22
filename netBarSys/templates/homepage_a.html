@@ -66,12 +66,12 @@
             {% for userinfo in userinfo_list.all %}
                 <tr>
                     <td>{{ userinfo.user.name }}</td>
-                    <td>{{ userinfo.loginintime }}</td>
+                    <td>{{ userinfo.logintime }}</td>
                     <td>{{ userinfo.lastLogouttime }}</td>
                     <td>{{ userinfo.onlinetime }}</td>
                     <td>{{ userinfo.fee }}</td>
                     <td><label id="id_state"></label></td>
-                    <td>&nbsp&nbsp<a href="{% url 'pages:forceoffline' userinfo.user.id %}">强制下线</a></td>
+                    <td>&nbsp&nbsp<a href="{% url 'forceoffline' userinfo.user.id %}">强制下线</a></td>
                 </tr>
             {% endfor %}
             </table>
