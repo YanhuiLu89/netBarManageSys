@@ -6,6 +6,7 @@ from django.urls import reverse
 from .models import Users,UserInfos
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime
+fee_hafhour=5 #费用5元/半小时
 
 #************************************************渲染相关函数****************************************
 def index(request):
@@ -44,6 +45,8 @@ def index(request):
                             print("HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH")
                             userinfo.state=1
                             userinfo.logintime=datetime.now()
+                            userinfo.onlinetime=0
+                            userinfo.onlinetimestr="不到1分钟"
                             userinfo.save()
                             context = {'userinfo': userinfo}
                             response=render(request, 'homepage.html',context)#跳到顾客首页界面
@@ -73,6 +76,7 @@ def home(request):#去首页
         print("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP")
         userinfo = UserInfos.objects.get(user = user)
         print("QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ %d" %userinfo.state)
+        print("userinfo.onlinetimestr =%s " % userinfo.onlinetimestr)
         context = {'userinfo': userinfo}
         return render(request, 'homepage.html',context)
     elif user.usertype == 1:
@@ -206,25 +210,43 @@ def timeValied(time):
 #定时任务，定时更新onlinetime
 def timfunc():
     userinfo_list = UserInfos.objects.all()
-    print("Tick! userinfo_list=%s" % userinfo_list.count())
+    print("Tick! Tick!Tick!Tick!Tick!Tick!Tick!Tick!Tick!userinfo_list=%s" % userinfo_list.count())
     for userinfo in userinfo_list:
         if userinfo.state==1 and timeValied(userinfo.logintime):
-            userinfo.onlinetime=(datetime.now()-userinfo.logintime).total_seconds()/60
-            print(userinfo.lastlogouttime)
-            print("userinfo.onlinetime=%d" % userinfo.onlinetime)
-            if userinfo.onlinetime>1: #如果上网时间大于4小时强制下线
+            userinfo.onlinetime=int((datetime.now()-userinfo.logintime).total_seconds()/60)
+            print("烦死了烦死了烦死了烦死了烦死了烦死了烦死了 ")
+            print("userinfo.onlintime =%d " % userinfo.onlinetime)
+            if userinfo.onlinetime>60:
+                print("userinfo.onlinetime>60。。。。。。。。。。。。。。。。。。。。")
+                userinfo.onlinetimestr=""+str(int(userinfo.onlinetime/60))+"小时"+ste(int(userinfo.onlinetime%60))+"分钟"
+            elif userinfo.onlinetime>1:
+                print("userinfo.onlinetime>1.。。。。。。。。。。。")
+                print("######################################")
+                userinfo.onlinetimestr=str(int(userinfo.onlinetime))+"分钟"
+                print("userinfo.onlintimestr =%s " % userinfo.onlinetimestr)
+            else:
+                print("userinfo.onlinetime<1.。。。。。。。。。。。")
+                userinfo.onlnietimestr="不到1分钟"
+            if userinfo.onlinetime<30:
+                 userinfo.fee=fee_hafhour #不满半小时按半小时算
+            else:
+                userinfo.fee=int(userinfo.onlinetime/30)*fee_hafhour
+
+            if userinfo.onlinetime>5: #如果上网时间大于4小时强制下线
                 print("userinfo.onlinetime>1 userinfo.state=3")
                 userinfo.state=3
-                userinfo.save()
+            print("0000000000000000000000000000000000000000000000")
+            print("userinfo.onlintimestr =%s " % userinfo.onlinetimestr)
         elif userinfo.state==3 and timeValied(userinfo.lastlogouttime):
             print("111111111111111111111111111111")
             print(userinfo.lastlogouttime)
             offlinetime=(datetime.now()-userinfo.lastlogouttime).total_seconds()/60 #距离上次超时退网的时间差
-            if offlinetime>1*2: #2小时后才能登陆
+            if offlinetime>2: #2小时后才能登陆
                 print("22222222222222222222")
                 userinfo.state=0
-                userinfo.save()
+        print("userinfo.save()userinfo.save()userinfo.save()userinfo.save()userinfo.save()userinfo.save()userinfo.save()userinfo.save()userinfo.save()userinfo.save()userinfo.save()userinfo.save()userinfo.save()")
+        userinfo.save()
     
 scheduler = BackgroundScheduler()
-scheduler.add_job(timfunc, 'interval', seconds=10) #1分钟定时器
+scheduler.add_job(timfunc, 'interval', seconds=60) #1分钟定时器
 scheduler.start()

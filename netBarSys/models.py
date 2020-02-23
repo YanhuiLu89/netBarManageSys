@@ -11,5 +11,6 @@ class UserInfos(models.Model):
     logintime=models.DateTimeField('login in time',default='1920-01-01 00:00:00')#登录时间,初始值赋值一个极早的时间，代表无效值
     lastlogouttime=models.DateTimeField('last login out time',default='1920-01-01 00:00:00')#上次登出时间,初始值赋值一个极早的时间，代表无效值
     onlinetime=models.IntegerField(default=0)#在线时间单位分钟，当该值超过240，强制下线
+    onlinetimestr=models.CharField(max_length=50,default="不到1分钟")#在线时间字符串形式
     state=models.IntegerField(default=0)#顾客状态0-offline normal,1-online normal 2 管理员手动强制下线  3、超时自动强制下线
     fee=models.IntegerField(default=0)#费用

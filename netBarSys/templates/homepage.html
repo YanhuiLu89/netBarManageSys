@@ -14,19 +14,20 @@
 <div id=textcontent>
     <table align="center">
         <tr>
-            <td align="left">上机时间:{{userinfo.logintime}}</td>
+            <td align="right" width="20%">上机时间：</td>
+            <td align="left" width="80%">{{userinfo.logintime}}</td>
         </tr>
         <tr>
-            <td align="left">上机时长:{{userinfo.onlinetime}}</td>
+            <td align="right" width="20%">上机时长：</td>
+            <td align="left" width="80%">{{userinfo.onlinetimestr}}</td>
         </tr>
         <tr>
-            <td align="left">费用:{{userinfo.fee}}</td>
+            <td  align="right" width="20%">费用：</td>
+            <td align="left" width="80%">{{userinfo.fee}}元</td>
         </tr>
         <tr>
-            <td align="left"><a id =link_out href="{% url 'logout' %}" >退出</a></td>
-        </tr>
-        <tr>
-            <td ><label name="state" id= "state">{{userinfo.state}}</label></td>
+            <td  align="right" width="20%" style="display: block"><label name="state" id= "state" style="display: none">{{userinfo.state}}</label></td>
+            <td align="left" width="80%"><a id =link_out href="{% url 'logout' %}" >退出</a></td>
         </tr>
     </table>
 </div>
@@ -41,6 +42,7 @@
             document.getElementById("link_out").click();
             alert("休息一下，2小时后登陆");
         }
+        var state = document.getElementById('onlinetime').innerHTML;
     }
     setTimeout("timer()",1000*30);
     function timer(){
