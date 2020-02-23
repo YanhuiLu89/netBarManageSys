@@ -65,12 +65,10 @@
                 }
             }
         }
-        setTimeout("timer()",20000);
+        setTimeout("timer()",1000*60);//每1分钟刷新依次网页
         function timer(){
-            alert("11111111111111111111111");
-            window.location.reload()
-            setTimeout("timer()",20000);
-            alert("222222222222222222222222");
+            document.getElementById("selectedlink_center").click();
+            setTimeout("timer()",1000*60);
         }
         </script>
     </div>
