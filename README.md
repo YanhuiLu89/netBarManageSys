@@ -29,7 +29,7 @@ create database netbar_manage_sys_db DEFAULT CHARACTER SET utf8 COLLATE utf8_gen
 	>>> admin.save()
 	ctrl-z退出 shell命令
 
-7、从命令行进入到netBarManageSys路径，执行python manage.py runserver,出现Starting development server at http://127.0.0.1:8000/之后，
-    在浏览器地址栏输入http://127.0.0.1:8000/pages/index/进入首页，首页有登录和注册入口
+7、从命令行进入到netBarManageSys路径，执行python manage.py runserver,出现Starting development server at 	 http://127.0.0.1:8000/之后，
+    在浏览器地址栏输入http://127.0.0.1:8000/index/进入登陆页面，登陆管理员账户
 
    

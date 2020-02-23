@@ -55,14 +55,14 @@
                 <tr>
                     <td width=25% align="left">用户</td>
                     <td width=25% align="left">&nbsp&nbsp密码</td>
-                    <td width=30% align="left">&nbsp&nbsp上次退出时间</td>
+                    <td width=30% align="left">&nbsp&nbsp上次登出时间</td>
                     <td width=20% align="left">&nbsp&nbsp状态</td>
                 </tr>
             {% for userinfo in offlineuserinfo_list.all %}
                 <tr>
                     <td width=25% align="left">{{ userinfo.user.name }}</td>
                     <td width=25% align="left">&nbsp&nbsp{{ userinfo.user.password }}</td>
-                    <td width=30% align="left">&nbsp&nbsp{{ userinfo.lastlogouttime }}</td>
+                    <td width=30% align="left"><label name="lastlogout" id= "{{userinfo.lastlogouttime}}"></td>
                     <td width=20% align="left">&nbsp&nbsp<label name="state" id= "state{{userinfo.state}}"></label></td>
                 </tr>
             {% endfor %}
@@ -84,6 +84,16 @@
                 }
                 else if(state.id.indexOf("3")!=-1){
                     state.innerText="超时下线";
+                }
+            }
+            var lastlogouts = document.getElementsByName('lastlogout');
+            for( var i=0; i<lastlogouts.length; i++){
+                var lastlogout=lastlogouts[i];
+                if(lastlogout.id.indexOf("1920")!=-1){
+                    lastlogout.innerText="未登陆过";
+                }
+                else{
+                    lastlogout.innerText=lastlogout.id;
                 }
             }
         }

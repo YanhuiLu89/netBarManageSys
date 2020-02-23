@@ -13,7 +13,6 @@ fee_hafhour=5 #费用5元/半小时
 
 #************************************************渲染相关函数****************************************
 def index(request):
-    print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
     if request.method == 'POST':
         tempname = request.POST['name']
         password =  request.POST['password']
@@ -21,16 +20,12 @@ def index(request):
         # 查询用户是否在数据库中
         print("%s,%s,%d"%(tempname,password,usertype))
         if Users.objects.filter(name=tempname).exists():
-            print("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB")
             user=Users.objects.get(name=tempname)
 
             if user.password==password and int(user.usertype)==usertype:
-                print("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCc")
                 if request.session.get("is_login")=='true' and request.COOKIES.get('name')==tempname:
-                    print("DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD")
                     return HttpResponseRedirect(reverse('home'))
                 else:
-                    print("EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE")
                     request.session['is_login'] = 'true'
                     request.session['name'] = 'name',
                     if user.usertype==1:
@@ -39,59 +34,45 @@ def index(request):
                         context = {'onlineuserinfo_list': onlineuserinfo_list,'offlineuserinfo_list': offlineuserinfo_list}
                         response=render(request, 'homepage_a.html',context)#跳到管理员首页界面
                     else:
-                        print("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")
                         userinfo = UserInfos.objects.get(user = user)
                         if userinfo.state==3:
-                            print("GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG")
                             messages.add_message(request,messages.ERROR,'距离你上次长时间上网还不到2个小时，请再休息一会')
                             return render(request, 'index.html')
                         else:
-                            print("HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH")
                             userinfo.state=1
                             userinfo.logintime=datetime.now()
                             userinfo.onlinetime=0
                             userinfo.onlinetimestr="不到1分钟"
+                            userinfo.fee=fee_hafhour
                             userinfo.save()
                             context = {'userinfo': userinfo}
                             response=render(request, 'homepage.html',context)#跳到顾客首页界面
                 #set cookie
-                print("JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ")
                 trans_uname = user.name.encode('utf-8').decode('latin-1')#转一下解决cooki不能设置中文的问题
                 response.set_cookie('name', trans_uname)
                 return response
             else:
-                print("KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK")
                 messages.add_message(request,messages.ERROR,'用户密码或身份类型错误')
                 return render(request, 'index.html')
         else:
-            print("LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL")
             messages.add_message(request,messages.ERROR,'用户不存在')
             return render(request, 'index.html')
-    print("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMM")
     return render(request, 'index.html')
 
 def home(request):#去首页
-    print("NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN")
     cook = request.COOKIES.get('name')
     if cook == None:
-        print("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
         return  render(request, 'index.html')
     else:
        trans_cook=cook.encode('latin-1').decode('utf-8')
     user = Users.objects.get(name = trans_cook)
     if user.usertype == 0:
-        print("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP")
         userinfo = UserInfos.objects.get(user = user)
-        print("QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ %d" %userinfo.state)
-        print("userinfo.onlinetimestr =%s " % userinfo.onlinetimestr)
         context = {'userinfo': userinfo}
         return render(request, 'homepage.html',context)
     elif user.usertype == 1:
-        print("RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR")
         onlineuserinfo_list = UserInfos.objects.filter(state=1).order_by('-logintime')
-        print("onlineuserinfo_list.count=%d" % onlineuserinfo_list.count() )
         offlineuserinfo_list = UserInfos.objects.filter(~Q(state=1)).order_by('-lastlogouttime')
-        print("offlineuserinfo_list.count=%d" % offlineuserinfo_list.count() )
         context = {'onlineuserinfo_list': onlineuserinfo_list,'offlineuserinfo_list': offlineuserinfo_list}
         return render(request, 'homepage_a.html',context)
 
@@ -157,7 +138,6 @@ def deluser(request,user_id):#删除用户
     return HttpResponseRedirect(reverse('mguser'))
 
 def logout(request):#退出
-    print("logoutlogoutlogoutlogoutlogoutlogoutlogoutlogoutlogoutlogoutlogoutlogoutlogoutlogoutlogoutlogout")
     cook = request.COOKIES.get('name')
     if cook == None:
         return  render(request, 'index.html')
@@ -167,7 +147,7 @@ def logout(request):#退出
     user = Users.objects.get(name = trans_cook)
     if user.usertype==0:
         userinfo = UserInfos.objects.get(user = user)
-        if userinfo.state!=3:
+        if userinfo.state==1:
             userinfo.state=0
         userinfo.lastlogouttime=datetime.now()
         userinfo.save()
@@ -242,7 +222,6 @@ def timeValied(time):
 #定时任务，定时更新onlinetime
 def timfunc():
     userinfo_list = UserInfos.objects.all()
-    print("Tick! Tick!Tick!Tick!Tick!Tick!Tick!Tick!Tick!userinfo_list=%s" % userinfo_list.count())
     for userinfo in userinfo_list:
         if userinfo.state==1 and timeValied(userinfo.logintime):
             userinfo.onlinetime=int((datetime.now()-userinfo.logintime).total_seconds()/60)
@@ -253,18 +232,19 @@ def timfunc():
                 userinfo.onlinetimestr=str(int(userinfo.onlinetime))+"分钟"
             else:
                 userinfo.onlnietimestr="不到1分钟"
-            if userinfo.onlinetime<30:
-                 userinfo.fee=fee_hafhour #不满半小时按半小时算
+            if userinfo.onlinetime<30: #不满半小时按半小时算
+                 userinfo.fee=fee_hafhour
             else:
-                userinfo.fee=int(userinfo.onlinetime/30)*fee_hafhour
+                userinfo.fee=int(userinfo.onlinetime/2)*fee_hafhour
 
             if userinfo.onlinetime>60*4: #如果上网时间大于4小时强制下线
-                print("userinfo.onlinetime>60*4 set userinfo.state=3")
+                print("userinfo.onlinetime>4hour set userinfo.state=3")
                 userinfo.state=3
         elif userinfo.state==3 and timeValied(userinfo.lastlogouttime):
             print(userinfo.lastlogouttime)
-            offlinetime=(datetime.now()-userinfo.lastlogouttime).total_seconds()/60 #距离上次超时退网的时间差
+            offlinetime=int((datetime.now()-userinfo.lastlogouttime).total_seconds()/60) #距离上次超时退网的时间差
             if offlinetime>60*2: #2小时后才能登陆
+                print("offlinetime>2hour set userinfo.state=0")
                 userinfo.state=0
         userinfo.save()
     
