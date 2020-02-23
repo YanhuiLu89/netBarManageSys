@@ -33,20 +33,19 @@
 <script>
      window.onload=function(){
         var state = document.getElementById('state').innerHTML;
-        //alert(state);
         if (state==2){
             document.getElementById("link_out").click();
             alert("你已被管理员强制下线");
         }
         if (state==3){
             document.getElementById("link_out").click();
-            alert("你已连续上网4小时，请休息一下（2小时后才能登陆）");
+            alert("休息一下，2小时后登陆");
         }
     }
-    setTimeout("timer()",1000*60);//每1分钟刷新依次网页
+    setTimeout("timer()",1000*30);
     function timer(){
         document.getElementById("selectedlink_center").click();
-        setTimeout("timer()",1000*60);//每1分钟刷新依次网页
+        setTimeout("timer()",1000*30);//每1分钟刷新依次网页
     }
 </script>
 {% endblock %}

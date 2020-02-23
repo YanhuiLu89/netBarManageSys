@@ -7,22 +7,7 @@ from .models import Users,UserInfos
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime
 
-# def timfunc():
-#     userinfo_list = UserInfos.objects.all()
-#     print("Tick! userinfo_list=%s" % userinfo_list.count())
-#     # for userinfo in userinfo_list:
-#     #     if userinfo.state==0:
-#     #         userinfo.onlinetime=(datetime.now()-userinfo.logintime).minute
-#     #         print('Tick! The time is: %s' % (datetime.now()-userinfo.logintime).minute)
-#     return HttpResponseRedirect(reverse('home'))
-    
-
-# scheduler = BackgroundScheduler()
-# scheduler.add_job(timfunc, 'interval', seconds=10) #1分钟定时器
-# scheduler.start()
-
-
-
+#************************************************渲染相关函数****************************************
 def index(request):
     print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
     if request.method == 'POST':
@@ -45,7 +30,7 @@ def index(request):
                     request.session['is_login'] = 'true'
                     request.session['name'] = 'name',
                     if user.usertype==1:
-                        userinfo_list = UserInfos.objects.filter().order_by('logintime')
+                        userinfo_list = UserInfos.objects.filter().order_by('-logintime')
                         context = {'userinfo_list': userinfo_list}
                         response=render(request, 'homepage_a.html',context)#跳到管理员首页界面
                     else:
@@ -58,6 +43,7 @@ def index(request):
                         else:
                             print("HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH")
                             userinfo.state=1
+                            userinfo.logintime=datetime.now()
                             userinfo.save()
                             context = {'userinfo': userinfo}
                             response=render(request, 'homepage.html',context)#跳到顾客首页界面
@@ -91,7 +77,7 @@ def home(request):#去首页
         return render(request, 'homepage.html',context)
     elif user.usertype == 1:
         print("RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR")
-        userinfo_list = UserInfos.objects.filter().order_by('logintime')
+        userinfo_list = UserInfos.objects.filter().order_by('-logintime')
         context = {'userinfo_list': userinfo_list}
         return render(request, 'homepage_a.html',context)
 
@@ -163,16 +149,19 @@ def deluser(request,user_id):#删除用户
     return HttpResponseRedirect(reverse('mguser'))
 
 def logout(request):#退出
+    print("logoutlogoutlogoutlogoutlogoutlogoutlogoutlogoutlogoutlogoutlogoutlogoutlogoutlogoutlogoutlogout")
     cook = request.COOKIES.get('name')
     print('cook:', cook)
     if cook == None:
+        print("cook == Nonecook == Nonecook == Nonecook == Nonecook == Nonecook == None")
         return  render(request, 'index.html')
     user = Users.objects.get(name = cook)
     if user.usertype==0:
         userinfo = UserInfos.objects.get(user = user)
         if userinfo.state!=3:
             userinfo.state=0
-            userinfo.save()
+        userinfo.lastlogouttime=datetime.now()
+        userinfo.save()
     request.session.delete()
     request.session.flush() 
     response=render(request, 'index.html')
@@ -205,3 +194,37 @@ def forceoffline(request,user_id):#强制下线
     forceoffuser.state=2 #将状态设置为强制下线，定时器中检测到该状态后，会强制顾客退出
     forceoffuser.save()
     return HttpResponseRedirect(reverse('home'))
+
+#************************************************逻辑处理相关函数****************************************
+def timeValied(time):
+    inittime=datetime(1980,1,2,0,0,0)
+    if time<inittime:
+        return False
+    else:
+        return True
+        
+#定时任务，定时更新onlinetime
+def timfunc():
+    userinfo_list = UserInfos.objects.all()
+    print("Tick! userinfo_list=%s" % userinfo_list.count())
+    for userinfo in userinfo_list:
+        if userinfo.state==1 and timeValied(userinfo.logintime):
+            userinfo.onlinetime=(datetime.now()-userinfo.logintime).total_seconds()/60
+            print(userinfo.lastlogouttime)
+            print("userinfo.onlinetime=%d" % userinfo.onlinetime)
+            if userinfo.onlinetime>1: #如果上网时间大于4小时强制下线
+                print("userinfo.onlinetime>1 userinfo.state=3")
+                userinfo.state=3
+                userinfo.save()
+        elif userinfo.state==3 and timeValied(userinfo.lastlogouttime):
+            print("111111111111111111111111111111")
+            print(userinfo.lastlogouttime)
+            offlinetime=(datetime.now()-userinfo.lastlogouttime).total_seconds()/60 #距离上次超时退网的时间差
+            if offlinetime>1*2: #2小时后才能登陆
+                print("22222222222222222222")
+                userinfo.state=0
+                userinfo.save()
+    
+scheduler = BackgroundScheduler()
+scheduler.add_job(timfunc, 'interval', seconds=10) #1分钟定时器
+scheduler.start()
