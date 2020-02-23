@@ -6,6 +6,9 @@ from django.urls import reverse
 from .models import Users,UserInfos
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime
+from django.db.models import Q 
+import json 
+
 fee_hafhour=5 #费用5元/半小时
 
 #************************************************渲染相关函数****************************************
@@ -31,8 +34,9 @@ def index(request):
                     request.session['is_login'] = 'true'
                     request.session['name'] = 'name',
                     if user.usertype==1:
-                        userinfo_list = UserInfos.objects.filter().order_by('-logintime')
-                        context = {'userinfo_list': userinfo_list}
+                        onlineuserinfo_list = UserInfos.objects.filter(state=1).order_by('-logintime')
+                        offlineuserinfo_list = UserInfos.objects.filter(~Q(state=1)).order_by('-lastlogouttime')
+                        context = {'onlineuserinfo_list': onlineuserinfo_list,'offlineuserinfo_list': offlineuserinfo_list}
                         response=render(request, 'homepage_a.html',context)#跳到管理员首页界面
                     else:
                         print("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")
@@ -52,7 +56,8 @@ def index(request):
                             response=render(request, 'homepage.html',context)#跳到顾客首页界面
                 #set cookie
                 print("JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ")
-                response.set_cookie('name', user.name)
+                trans_uname = user.name.encode('utf-8').decode('latin-1')#转一下解决cooki不能设置中文的问题
+                response.set_cookie('name', trans_uname)
                 return response
             else:
                 print("KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK")
@@ -71,7 +76,9 @@ def home(request):#去首页
     if cook == None:
         print("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
         return  render(request, 'index.html')
-    user = Users.objects.get(name = cook)
+    else:
+       trans_cook=cook.encode('latin-1').decode('utf-8')
+    user = Users.objects.get(name = trans_cook)
     if user.usertype == 0:
         print("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP")
         userinfo = UserInfos.objects.get(user = user)
@@ -81,31 +88,22 @@ def home(request):#去首页
         return render(request, 'homepage.html',context)
     elif user.usertype == 1:
         print("RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR")
-        userinfo_list = UserInfos.objects.filter().order_by('-logintime')
-        context = {'userinfo_list': userinfo_list}
+        onlineuserinfo_list = UserInfos.objects.filter(state=1).order_by('-logintime')
+        print("onlineuserinfo_list.count=%d" % onlineuserinfo_list.count() )
+        offlineuserinfo_list = UserInfos.objects.filter(~Q(state=1)).order_by('-lastlogouttime')
+        print("offlineuserinfo_list.count=%d" % offlineuserinfo_list.count() )
+        context = {'onlineuserinfo_list': onlineuserinfo_list,'offlineuserinfo_list': offlineuserinfo_list}
         return render(request, 'homepage_a.html',context)
 
-def searchuser(request):#搜索用户
-    cook = request.COOKIES.get('name')
-    print('cook:', cook)
-    if cook == None:
-        return  render(request, 'index.html')
-    user = Users.objects.get(name = cook)
-    if request.method == 'POST':
-        if 'search' in request.POST:#搜索
-            searchcontent=request.POST['search_content']
-            userinfo_list=UserInfos.objects.filter().order_by('-publishtime') 
-            context = {'userinfo_list': userinfo_list}
-            messages.add_message(request,messages.INFO,'共'+str(len(userinfo_list))+'条结果')
-            return  render(request,'homepage_a.html',context )
-    return render(request, 'homepage_a.html')
 
 def onlineuser(request):#显示在线用户
     cook = request.COOKIES.get('name')
-    print('cook:', cook)
     if cook == None:
         return  render(request, 'index.html')
-    user = Users.objects.get(name = cook)
+    else:
+        trans_cook=cook.encode('latin-1').decode('utf-8')
+    print('cook:',  trans_cook)
+    user = Users.objects.get(name = trans_cook)
     userinfo_list=UserInfos.objects.filter(state=1).order_by('-publishtime') 
     userinfo_list=UserInfos.objects.filter().order_by(onlinetime) 
     context = {'userinfo_list': userinfo_list}
@@ -116,16 +114,20 @@ def mguser(request):#管理用户
     print('cook:', cook)
     if cook == None:
         return  render(request, 'index.html')
-    user = Users.objects.get(name = cook)
+    else:
+        trans_cook=cook.encode('latin-1').decode('utf-8')
+    user = Users.objects.get(name = trans_cook)
     user_list=Users.objects.filter(usertype=0).order_by('-id')#只管理非管理员账户
     context = {'user_list': user_list}
     return  render(request,'mguser.html',context )
 
 def adduser(request):#添加用户
     cook = request.COOKIES.get('name')
-    print('cook:', cook)
     if cook == None:
         return  render(request, 'index.html')
+    else:
+        trans_cook=cook.encode('latin-1').decode('utf-8')
+    print('cook:', trans_cook)
     if request.method == 'POST':
         tempname = request.POST['name']
         temppsw = request.POST['password']
@@ -143,9 +145,11 @@ def adduser(request):#添加用户
 
 def deluser(request,user_id):#删除用户
     cook = request.COOKIES.get('name')
-    print('cook:', cook)
     if cook == None:
         return  render(request, 'index.html')
+    else:
+        trans_cook=cook.encode('latin-1').decode('utf-8')
+    print('cook:', trans_cook)
     temp_id=user_id
     user = Users.objects.get(id=temp_id)
     UserInfos.objects.filter(user=user).delete()
@@ -155,11 +159,12 @@ def deluser(request,user_id):#删除用户
 def logout(request):#退出
     print("logoutlogoutlogoutlogoutlogoutlogoutlogoutlogoutlogoutlogoutlogoutlogoutlogoutlogoutlogoutlogout")
     cook = request.COOKIES.get('name')
-    print('cook:', cook)
     if cook == None:
-        print("cook == Nonecook == Nonecook == Nonecook == Nonecook == Nonecook == None")
         return  render(request, 'index.html')
-    user = Users.objects.get(name = cook)
+    else:
+        trans_cook=cook.encode('latin-1').decode('utf-8')
+    print('cook:', trans_cook)
+    user = Users.objects.get(name = trans_cook)
     if user.usertype==0:
         userinfo = UserInfos.objects.get(user = user)
         if userinfo.state!=3:
@@ -174,22 +179,49 @@ def logout(request):#退出
 
 def myinfo(request):#我的界面
     cook = request.COOKIES.get('name')
-    print('cook:', cook)
     if cook == None:
         return  render(request, 'index.html')
-    user = Users.objects.get(name = cook)
-    content={'my':user}
+    else:
+        trans_cook=cook.encode('latin-1').decode('utf-8')
+    print('cook:', trans_cook)
+    user = Users.objects.get(name = trans_cook)
     if user.usertype==0:
+        userinfo = UserInfos.objects.get(user = user)
+        content={'my':user,"userinfo":userinfo}
         return render(request, 'my.html',content)
-    elif user.usertype==1:
+    else:
+        content={'my':user}
         return render(request, 'my_a.html',content)
+
+def modifypsw(request):#修改密码
+    cook = request.COOKIES.get('name')
+    if cook == None:
+        return  render(request, 'index.html')
+    else:
+        trans_cook=cook.encode('latin-1').decode('utf-8')
+    print('cook:', trans_cook)
+    user = Users.objects.get(name = trans_cook)
+    if request.method == 'POST':
+        temp_psw=request.POST.get('password')
+        user.password=temp_psw
+        user.save()
+        return HttpResponseRedirect(reverse('myinfo'))
+    if user.usertype==0:
+        userinfo = UserInfos.objects.get(user = user)
+        content={'my':user,"userinfo":userinfo}
+        return  render(request,'modifypsw.html',content)
+    else:
+        content={'my':user}
+        return  render(request,'modifypsw_a.html',content)
 
 def forceoffline(request,user_id):#强制下线
     cook = request.COOKIES.get('name')
-    print('cook:', cook)
     if cook == None:
         return  render(request, 'index.html')
-    user = Users.objects.get(name = cook)
+    else:
+        trans_cook=cook.encode('latin-1').decode('utf-8')
+    print('cook:', trans_cook)
+    user = Users.objects.get(name = trans_cook)
     if user.usertype==0:
         return  render(request, 'index.html')
     temp_id=user_id
@@ -214,37 +246,26 @@ def timfunc():
     for userinfo in userinfo_list:
         if userinfo.state==1 and timeValied(userinfo.logintime):
             userinfo.onlinetime=int((datetime.now()-userinfo.logintime).total_seconds()/60)
-            print("烦死了烦死了烦死了烦死了烦死了烦死了烦死了 ")
             print("userinfo.onlintime =%d " % userinfo.onlinetime)
             if userinfo.onlinetime>60:
-                print("userinfo.onlinetime>60。。。。。。。。。。。。。。。。。。。。")
-                userinfo.onlinetimestr=""+str(int(userinfo.onlinetime/60))+"小时"+ste(int(userinfo.onlinetime%60))+"分钟"
+                userinfo.onlinetimestr=""+str(int(userinfo.onlinetime/60))+"小时"+str(int(userinfo.onlinetime%60))+"分钟"
             elif userinfo.onlinetime>1:
-                print("userinfo.onlinetime>1.。。。。。。。。。。。")
-                print("######################################")
                 userinfo.onlinetimestr=str(int(userinfo.onlinetime))+"分钟"
-                print("userinfo.onlintimestr =%s " % userinfo.onlinetimestr)
             else:
-                print("userinfo.onlinetime<1.。。。。。。。。。。。")
                 userinfo.onlnietimestr="不到1分钟"
             if userinfo.onlinetime<30:
                  userinfo.fee=fee_hafhour #不满半小时按半小时算
             else:
                 userinfo.fee=int(userinfo.onlinetime/30)*fee_hafhour
 
-            if userinfo.onlinetime>5: #如果上网时间大于4小时强制下线
-                print("userinfo.onlinetime>1 userinfo.state=3")
+            if userinfo.onlinetime>60*4: #如果上网时间大于4小时强制下线
+                print("userinfo.onlinetime>60*4 set userinfo.state=3")
                 userinfo.state=3
-            print("0000000000000000000000000000000000000000000000")
-            print("userinfo.onlintimestr =%s " % userinfo.onlinetimestr)
         elif userinfo.state==3 and timeValied(userinfo.lastlogouttime):
-            print("111111111111111111111111111111")
             print(userinfo.lastlogouttime)
             offlinetime=(datetime.now()-userinfo.lastlogouttime).total_seconds()/60 #距离上次超时退网的时间差
-            if offlinetime>2: #2小时后才能登陆
-                print("22222222222222222222")
+            if offlinetime>60*2: #2小时后才能登陆
                 userinfo.state=0
-        print("userinfo.save()userinfo.save()userinfo.save()userinfo.save()userinfo.save()userinfo.save()userinfo.save()userinfo.save()userinfo.save()userinfo.save()userinfo.save()userinfo.save()userinfo.save()")
         userinfo.save()
     
 scheduler = BackgroundScheduler()

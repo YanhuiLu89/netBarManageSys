@@ -29,4 +29,5 @@ urlpatterns = [
     path('adduser/', views.adduser, name='adduser'),
     path('deluser/<user_id>', views.deluser, name='deluser'),
     path('forceoffline/<user_id>', views.forceoffline, name='forceoffline'),
+    path('modifypsw', views.modifypsw, name='modifypsw'),
 ]

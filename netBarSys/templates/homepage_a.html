@@ -5,43 +5,65 @@
 <br/>
 {% endblock %}
 
+{% block style %} 
+    <style type="text/css">
+        #textcontent {
+        width: 80%;
+        height: auto;
+        font-size:20px;
+        word-wrap:break-word;
+        word-break:break-all;
+        overflow: hidden;
+        margin:5% auto
+    }
+    </style>
+{% endblock %}
+
 {% block topmenucenter %}
     <div style="padding:5px">
         <a id =selectedlink_center href="{% url 'home' %}">首页</a>
-        <a id =link_center href="{% url 'onlineuser' %}">在线用户</a> 
         <a id =link_center  href="{% url 'mguser' %}">用户管理</a> 
     </div>
 {% endblock %}
 
 {% block contentbody %}
-    <div style="margin: 5% 5% 5% 5%">
-        <form enctype='multipart/form-data' action="{% url 'searchuser' %}" method="post" name='searchuser' >{% csrf_token %}
-            <table align="center">
-                <tr>
-                    <td><input type="text" id="search" name="search_content" placeholder="请输入您要搜索的用户名" style="width:600px; height:30px"/></td>
-                    <td><input type="submit" name='search' value="搜索" style="width:80px; height:50px"></td>
-            </table>
-        </form>
+    <div style="margin: 0% 5% 0% 5%">
         <div id=textcontent>
+            <h4>在线用户</h4>
             <table align="center">
                 <tr>
-                    <td width=10%>用户</td>
-                    <td width=20%>上机时间</td>
-                    <td width=20%>下机时间</td>
-                    <td width=20%>上机时长</td>
-                    <td width=10%>费用</td>
-                    <td width=10%>状态</td>
-                    <td width=10%>管理</td>
+                    <td width=20% align="left">用户</td>
+                    <td width=30% align="left">&nbsp&nbsp上机时间</td>
+                    <td width=20% align="left">&nbsp&nbsp上机时长</td>
+                    <td width=15% align="left">&nbsp&nbsp费用</td>
+                    <td width=10% align="left">&nbsp&nbsp管理</td>
                 </tr>
-            {% for userinfo in userinfo_list.all %}
+            {% for userinfo in onlineuserinfo_list.all %}
                 <tr>
-                    <td>{{ userinfo.user.name }}</td>
-                    <td>{{ userinfo.logintime }}</td>
-                    <td>{{ userinfo.lastlogouttime }}</td>
-                    <td>{{ userinfo.onlinetime }}</td>
-                    <td>{{ userinfo.fee }}</td>
-                    <td ><label name="state" id= "state{{userinfo.state}}"></label></td>
-                    <td>&nbsp&nbsp<a href="{% url 'forceoffline' userinfo.user.id %}">强制下线</a></td>
+                    <td width=20% align="left">{{ userinfo.user.name }}</td>
+                    <td width=30% align="left">&nbsp&nbsp{{ userinfo.logintime }}</td>
+                    <td width=20% align="left">&nbsp&nbsp{{ userinfo.onlinetimestr }}</td>
+                    <td width=15% align="left">&nbsp&nbsp{{ userinfo.fee }}元</td>
+                    <td width=15% align="left">&nbsp&nbsp<a href="{% url 'forceoffline' userinfo.user.id %}">下线</a></td>
+                </tr>
+            {% endfor %}
+            </table>
+        </div>
+        <div id=textcontent>
+            <h4>离线用户</h4>
+            <table align="center">
+                <tr>
+                    <td width=25% align="left">用户</td>
+                    <td width=25% align="left">&nbsp&nbsp密码</td>
+                    <td width=30% align="left">&nbsp&nbsp上次退出时间</td>
+                    <td width=20% align="left">&nbsp&nbsp状态</td>
+                </tr>
+            {% for userinfo in offlineuserinfo_list.all %}
+                <tr>
+                    <td width=25% align="left">{{ userinfo.user.name }}</td>
+                    <td width=25% align="left">&nbsp&nbsp{{ userinfo.user.password }}</td>
+                    <td width=30% align="left">&nbsp&nbsp{{ userinfo.lastlogouttime }}</td>
+                    <td width=20% align="left">&nbsp&nbsp<label name="state" id= "state{{userinfo.state}}"></label></td>
                 </tr>
             {% endfor %}
             </table>
@@ -58,10 +80,10 @@
                     state.innerText="在线";
                 }
                 else if(state.id.indexOf("2")!=-1){
-                    state.innerText="管理员手动强制下线";
+                    state.innerText="强制下线";
                 }
                 else if(state.id.indexOf("3")!=-1){
-                    state.innerText="超时自动强制下线";
+                    state.innerText="超时下线";
                 }
             }
         }

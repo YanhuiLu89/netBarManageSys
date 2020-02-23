@@ -8,7 +8,6 @@
 {% block topmenucenter %}
     <div style="padding:5px">
         <a id =link_center href="{% url 'home' %}">首页</a>
-        <a id =link_center href="{% url 'onlineuser' %}">在线用户</a> 
         <a id =selectedlink_center  href="{% url 'mguser' %}">用户管理</a> 
     </div>
 {% endblock %}
@@ -32,15 +31,15 @@
             <form action="{% url 'mguser' %}" method="post" name='mguser'>{% csrf_token %}
                 <table>
                     <tr>
-                        <td width=40% style="font-weight: bold">账号</td>
-                        <td width=40% style="font-weight: bold">密码</td>
-                        <td width=20%></td>
+                        <td width=35% style="font-weight: bold">账号</td>
+                        <td width=35% style="font-weight: bold">密码</td>
+                        <td width=30%></td>
                     </tr>
                     {% for user in user_list.all %}
                         <tr>
-                            <td>{{user.name }}</td>
-                            <td>{{ user.password }}</td>
-                            <td width=20%><a href="{% url 'deluser' user.id %}">删除</a></td>
+                            <td width=35%>{{user.name }}</td>
+                            <td width=35%>{{ user.password }}</td>
+                            <td width=30%><a href="{% url 'deluser' user.id %}">删除</a></td>
                         </tr>
                     {% endfor %}
                 </table>

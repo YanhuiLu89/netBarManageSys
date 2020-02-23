@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block head %}  
+<br/>
+{% endblock %}
+
+{% block topmenucenter %}
+<div style="padding:20px">
+    <a id =link_center href="{% url 'home' %}">首页</a>
+</div>
+{% endblock %}
+
+{% block contentbody %}
+<div style="margin: 0% 10% 0% 10%">
+        <div style="width:100%; height:300px">
+            <h4>我的->修改密码</h4>
+            <form enctype='multipart/form-data' action="{% url 'modifypsw' %}" method="post" name='modifypsw' >{% csrf_token %}
+                <table style="margin:0% 0% 0% 0%;width:100%;" vertical-align=left>
+                    <tr align="left">
+                        <td width="20%" align="right">账户:</td>
+                        <td width="80%" align="left">{{ my.name }}</td>
+                    </tr>
+                    <tr>
+                        <td width="20%" align="right">密码:</td>
+                        <td width=80%" align="left"><input type="text"  name="password"   style="width:800px;height:32px"/></td>
+                    </tr>
+                    <tr>
+                        <td width="20%"align="right"style="display: block"><label name="state" id= "state" style="display: none">{{userinfo.state}}</td>
+                        <td width="80%" align="left"><input type="submit" value="确定" name="confirmmodifypsw" style="width:200px; height:30px;float:right" ></a></td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+    </div>
+    <script>
+        window.onload=function(){
+           var state = document.getElementById('state').innerHTML;
+           if (state==2){
+               document.getElementById("link_out").click();
+               alert("你已被管理员强制下线");
+           }
+           if (state==3){
+               document.getElementById("link_out").click();
+               alert("休息一下，2小时后登陆");
+           }
+           var state = document.getElementById('onlinetime').innerHTML;
+       }
+       setTimeout("timer()",1000*30);
+       function timer(){
+           document.getElementById("myinfo").click();
+           setTimeout("timer()",1000*30);//每30s分钟刷新依次网页
+       }
+   </script>
+{% endblock %}
