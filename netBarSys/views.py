@@ -235,7 +235,7 @@ def timfunc():
             if userinfo.onlinetime<30: #不满半小时按半小时算
                  userinfo.fee=fee_hafhour
             else:
-                userinfo.fee=int(userinfo.onlinetime/2)*fee_hafhour
+                userinfo.fee=int(userinfo.onlinetime/30)*fee_hafhour
 
             if userinfo.onlinetime>60*4: #如果上网时间大于4小时强制下线
                 print("userinfo.onlinetime>4hour set userinfo.state=3")
