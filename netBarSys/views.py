@@ -237,13 +237,13 @@ def timfunc():
             else:
                 userinfo.fee=int(userinfo.onlinetime/30)*fee_hafhour
 
-            if userinfo.onlinetime>60*4: #如果上网时间大于4小时强制下线
+            if userinfo.onlinetime>(60*4): #如果上网时间大于4小时强制下线
                 print("userinfo.onlinetime>4hour set userinfo.state=3")
                 userinfo.state=3
         elif userinfo.state==3 and timeValied(userinfo.lastlogouttime):
             print(userinfo.lastlogouttime)
             offlinetime=int((datetime.now()-userinfo.lastlogouttime).total_seconds()/60) #距离上次超时退网的时间差
-            if offlinetime>60*2: #2小时后才能登陆
+            if offlinetime>(60*2): #2小时后才能登陆
                 print("offlinetime>2hour set userinfo.state=0")
                 userinfo.state=0
         userinfo.save()
