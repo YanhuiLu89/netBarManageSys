@@ -19,7 +19,6 @@ create database netbar_manage_sys_db DEFAULT CHARACTER SET utf8 COLLATE utf8_gen
 
 5、同步数据库，在netBarManageSys路径依次执行以下命令：
 	python manage.py makemigrations
- 	python manage.py sqlmigrate netBarSys  0001
  	python manage.py migrate
 6、创建管理员账户，管理员是不能注册的。从命令行进入netBarManageSys路径，依次执行以下命令
 	 python manage.py shell
@@ -29,10 +28,14 @@ create database netbar_manage_sys_db DEFAULT CHARACTER SET utf8 COLLATE utf8_gen
 	>>> admin.save()
 	ctrl-z退出 shell命令
 
-7、从命令行进入到netBarManageSys路径，执行python manage.py runserver,出现Starting development server at 	 http://127.0.0.1:8000/之后，
+7、同步数据库
+    python manage.py makemigrations
+    python manage.py sqlmigrate pages 0001
+    python manage.py migrate
+8、从命令行进入到netBarManageSys路径，执行python manage.py runserver,出现Starting development server at 	 http://127.0.0.1:8000/之后，
     在浏览器地址栏输入http://127.0.0.1:8000/index/进入登陆页面，登陆管理员账户
 
 
-8、注意：用户名和命名最好不要使用中文，推荐英文字母和数字
+9、注意：用户名和命名最好不要使用中文，推荐英文字母和数字
 
    
